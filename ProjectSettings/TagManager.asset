@@ -38,8 +38,14 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Water
+    uniqueID: 3844447121
+    locked: 0
   - name: Ground
     uniqueID: 227513577
+    locked: 0
+  - name: Ground2
+    uniqueID: 2559103931
     locked: 0
   - name: Default
     uniqueID: 0
