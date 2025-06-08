@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2173031619862371534}
   m_Layer: 0
   m_Name: Crop_Corn
-  m_TagString: Untagged
+  m_TagString: Crop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d2e7b67537efe04ca2d3e1d6be58ea3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  score: 15
+  score: 12
   isHarvested: 0
 --- !u!212 &5648150654664828456
 SpriteRenderer:

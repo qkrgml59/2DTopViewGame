@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
 
     public bool isNight = false;
     public bool hutOpen = false;
+    public GameObject hutDoor;
 
     public int timer = 0;      //초 단위 누적 시간
     public int dayDuration = 10;    //낮 지속 시간 (초)
@@ -18,14 +19,14 @@ public class GameManager : MonoBehaviour
 
     private float secondCounter = 0f;     // 1초 단위 체크용
 
-    public GameObject hutDoor;
+   
 
-    public GameObject[] cropPrefabs;     //작물 프리팹 7개
-    public Transform[] cropSpawnPoions;     // 작물 생성 위치들
+    public GameObject[] cropPrefabs;       //작물 프리팹 7개
+    public Transform[] cropSpawnPoints;     // 작물 생성 위치들
 
 
-// Start is called before the first frame update
-void Start()
+    // Start is called before the first frame update
+    void Start()
     {
         SpawnCrops();     //첫 날 시작할 때 작물 생성
     }
@@ -76,12 +77,17 @@ void Start()
 
     public void SpawnCrops()              //작물 생성 함수
     {
-        GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("crop");
+        GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("Crop");
         foreach (GameObject crop in oldCrops)
         {
             Destroy(crop);
         }
-        // .... 일단 보류
+        
+        for (int i = 0; i < Mathf.Min(cropSpawnPoints.Length, cropPrefabs.Length); i++)
+            {
+            Instantiate(cropPrefabs[i], cropSpawnPoints[i].position, Quaternion.identity);
+            }
+
     }
 
     public void NextDay()
