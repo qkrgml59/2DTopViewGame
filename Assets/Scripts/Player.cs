@@ -114,7 +114,7 @@ public class Player : MonoBehaviour
             return;
         }
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.05f);            //플레이어 주변 1.0 반경의 오브젝트들을 모두 가져옴
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.1f);            //플레이어 주변 1.0 반경의 오브젝트들을 모두 가져옴
 
         foreach (var hit in hits)
         {
