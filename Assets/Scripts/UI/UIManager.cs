@@ -3,23 +3,78 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEditorInternal.Profiling.Memory.Experimental.FileFormat;
+using UnityEngine.SceneManagement;
+using UnityEditor;
+using UnityEngine.UI;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
-   
+
 
     [Header("텍스트 UI")]
     public TextMeshProUGUI dayText;
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI timerText;
+    public TextMeshProUGUI score;
+    
 
     [Header("랭킹 UI")]
-    public GameObject rankingPanel;
-    public TextMeshProUGUI rankingListText;
-    public TMP_InputField playerNameInput;
+    public TMP_InputField inputField;
+    public Button gameStartButton;
+
+    [Header("낮과 밤 UI")]
+    public Image dayNightImage;
+    public Sprite daySprite;
+    public Sprite nightSprite;
+    public GameObject nightOverlay;
+
+
+
 
     public RankingManager rankingManager;
+    public GameObject helpUI;
+    public GameObject RankingUI;
+
+    private void Start()
+    {
+        Instance = this;
+    }
+
+    public void GameStart()
+    {
+        // gameStartButton.onClick.AddListener(OnGameStartButtonClicked);
+        SceneManager.LoadScene("PlayScene");
+    }
+
+    private void OnGameStartButtonClicked()
+    {
+        string playerName = inputField.text;
+        if (string.IsNullOrEmpty(playerName) )
+        {
+            Debug.Log("플레이어 이름을 입력하세요");
+            return;
+        }
+
+        PlayerPrefs.SetString("PlayerName", playerName);
+        PlayerPrefs.Save();
+
+        Debug.Log("플레이어 이름 저장 됨 : " + playerName);
+
+        SceneManager.LoadScene("PlayScene");
+    }
+
+   
+
+
+    public void GameExit()
+    {
+        Application.Quit();
+    }
+
+    
+   
 
     private void Awake()
     {
@@ -35,7 +90,8 @@ public class UIManager : MonoBehaviour
 
     public void UpdateScore(int score)
     {
-        scoreText.text = "Score: " + score;
+        Debug.Log("UIManager 점수 업데이트 호출 됨: " + score);
+        scoreText.text = "Score :" + score;
     }
 
     public void UpdateTimer(int seconds)
@@ -43,21 +99,26 @@ public class UIManager : MonoBehaviour
         timerText.text = "Time: " + seconds + "s";
     }
 
-    public void ShowRanking()
+    public void UpdateDayNightUI(bool isNight)
     {
-        rankingPanel.SetActive(true);
-        rankingListText.text = "";
+        Debug.Log("낮밤 UI 업데이트: " + (isNight ? "밤" : "낮"));
 
-        int rank = 1;
-        foreach (RankingEntry entry in rankingManager.currentData.rankings)
+
+        if (dayNightImage == null || daySprite == null || nightSprite == null)
         {
-            rankingListText.text += $"{rank}. {entry.playerName} - {entry.score}점\n";
-            rank++;
+            Debug.LogWarning("낮밤 UI 이미지가 연결되어 있지 않아요!");
+            return;
+        }
+
+        dayNightImage.sprite = isNight ? nightSprite : daySprite;
+
+        if (nightOverlay != null)
+        {
+            nightOverlay.SetActive(isNight);
         }
     }
 
-    public string GetPlayerName()
-    {
-        return playerNameInput.text;
-    }
+
+
+
 }

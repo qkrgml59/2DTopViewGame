@@ -64,6 +64,8 @@ public class Player : MonoBehaviour
         rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
     }
 
+
+
     void AnimateDirection()
     {
         if (input.sqrMagnitude > 0.01f)
@@ -129,7 +131,12 @@ public class Player : MonoBehaviour
                 ShowHarvestAnimation();
                 // 채집 점수 추가
                 Debug.Log("작물 수확 총 수확 수 : " + crop.score + "점 | 총 점수 : " + totalScore);
+
+                UIManager.Instance.UpdateScore(totalScore);
                 return;
+
+                
+
             }
         }
     }

@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     public int nightDuration = 10;   //밤 지속 시간 (초)
 
     private float secondCounter = 0f;     // 1초 단위 체크용
-
+    public static GameManager Instance;
    
 
     public GameObject[] cropPrefabs;       //작물 프리팹 7개
@@ -31,6 +31,9 @@ public class GameManager : MonoBehaviour
         SpawnCrops();     //첫 날 시작할 때 작물 생성
     }
 
+   
+
+
     // Update is called once per frame
     void Update()
     {
@@ -41,6 +44,8 @@ public class GameManager : MonoBehaviour
             secondCounter = 0f;
             timer++;
 
+            UIManager.Instance.UpdateTimer(timer);
+
             if (!isNight && timer >= dayDuration)
             {
 
@@ -48,6 +53,8 @@ public class GameManager : MonoBehaviour
                 isNight = true;
                 timer = 0;
                 Debug.Log("밤 시작");
+
+                UIManager.Instance.UpdateDayNightUI(isNight);
             }
             else if (isNight && timer >= nightDuration)
             {
@@ -58,6 +65,8 @@ public class GameManager : MonoBehaviour
                 day++;
                 Debug.Log("다음 날 : " + day);
 
+                UIManager.Instance.UpdateDay(day);
+                UIManager.Instance.UpdateDayNightUI(isNight);
                 SpawnCrops();
             }
         }
@@ -75,6 +84,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
+    public void AddScore(int value)
+{
+    score += value;
+    UIManager.Instance.UpdateScore(score);  // UI 갱신
+}
     public void SpawnCrops()              //작물 생성 함수
     {
         GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("Crop");
