@@ -90,11 +90,7 @@ public class GameManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    public void AddScore(int value)
-{
-    score += value;
-    UIManager.Instance.UpdateScore(score);  // UI 갱신
-}
+
     public void SpawnCrops()              //작물 생성 함수
     {
         GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("Crop");
