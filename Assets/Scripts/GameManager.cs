@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+
+    
   public int score = 0;
     public int goalScore = 100;
     public int day = 1;
@@ -125,6 +127,15 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("목표 점수에 도달하지 못해서 오두막 문이 닫혀 있습니다.");
         }
+    }
+
+    public void GameOver()
+    {
+        string playerName = PlayerPrefs.GetString("PlayerName", "Unknown");
+
+        FindObjectOfType<RankingManager>().AddRanking(playerName, score);
+
+        UIManager.Instance.ShowRanking(FindObjectOfType<RankingManager>().currentData.rankings);
     }
 
 }

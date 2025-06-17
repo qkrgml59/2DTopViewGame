@@ -2,24 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using JetBrains.Annotations;
-using UnityEditor;
 using UnityEngine;
 
-
 [System.Serializable]
-
 public class RankingEntry
 {
     public string playerName;
     public int score;
+
 }
-
 [System.Serializable]
-
 public class RankingData
 {
     public List<RankingEntry> rankings = new List<RankingEntry>();
 }
+
 public class RankingManager : MonoBehaviour
 {
     public RankingData currentData = new RankingData();
@@ -35,7 +32,7 @@ public class RankingManager : MonoBehaviour
     public void AddRanking(string playerName, int score)
     {
         currentData.rankings.Add(new RankingEntry { playerName = playerName, score = score });
-        currentData.rankings.Sort((a, b) => b.score.CompareTo(a.score));
+        currentData.rankings.Sort((a, b) => b.score.CompareTo(a.score)); // 내림차순 정렬
         SaveRanking();
     }
 
@@ -52,13 +49,33 @@ public class RankingManager : MonoBehaviour
         {
             string json = File.ReadAllText(filePath);
             currentData = JsonUtility.FromJson<RankingData>(json);
-            Debug.Log("랭킹 불러오기 완료");
+            Debug.Log("랭킹 로드 완료");
         }
-
+        else
+        {
+            Debug.Log("랭킹 파일이 존재하지 않습니다. 새로 생성합니다.");
+        }
+    }
+        public void GameOverSave()
+        {
+        string playerName = PlayerPrefs.GetString("PlayerName", "플레이어");
+        int finalScore = FindObjectOfType<GameManager>().score;
+        AddRanking(playerName, finalScore);
     }
 
-    void GameOver()
+    public void Start()
     {
-        FindObjectOfType<RankingManager>().AddRanking("플레이어1", 350);
+        UIManager.Instance.ShowRanking(currentData.rankings);
+    }
+
+    public void ShowRankingUI()
+    {
+        UIManager.Instance.ShowRanking(currentData.rankings);
+    }
+
+    public void OnRankingButtonCliked()
+    {
+        FindObjectOfType<RankingManager>().ShowRankingUI();
     }
 }
+

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class Player : MonoBehaviour
 {
@@ -131,6 +133,7 @@ public class Player : MonoBehaviour
                 ShowHarvestAnimation();
                 // 채집 점수 추가
                 Debug.Log("작물 수확 총 수확 수 : " + crop.score + "점 | 총 점수 : " + totalScore);
+                //저장된 점수 불러오기
 
                 UIManager.Instance.UpdateScore(totalScore);
                 return;

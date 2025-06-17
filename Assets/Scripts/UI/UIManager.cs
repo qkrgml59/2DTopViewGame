@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEngine.UI;
 using UnityEngine.SocialPlatforms.Impl;
+using static RankingManager;
 
 public class UIManager : MonoBehaviour
 {
@@ -18,11 +19,13 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI score;
-    
+
 
     [Header("랭킹 UI")]
     public TMP_InputField inputField;
     public Button gameStartButton;
+    public GameObject rankingPanel;
+    public TextMeshProUGUI rankingText;
 
     [Header("낮과 밤 UI")]
     public Image dayNightImage;
@@ -33,7 +36,7 @@ public class UIManager : MonoBehaviour
 
 
 
-    public RankingManager rankingManager;
+
     public GameObject helpUI;
     public GameObject RankingUI;
 
@@ -41,6 +44,18 @@ public class UIManager : MonoBehaviour
     {
         Instance = this;
     }
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else
+        {
+             Destroy(gameObject);
+        }
+
+       
+    
+}
 
     public void GameStart()
     {
@@ -50,8 +65,9 @@ public class UIManager : MonoBehaviour
 
     private void OnGameStartButtonClicked()
     {
+
         string playerName = inputField.text;
-        if (string.IsNullOrEmpty(playerName) )
+        if (string.IsNullOrEmpty(playerName))
         {
             Debug.Log("플레이어 이름을 입력하세요");
             return;
@@ -65,7 +81,21 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene("PlayScene");
     }
 
+    public void ShowRanking (List<RankingEntry> rankings)
+    {
+        rankingPanel.SetActive(true);
+
+        rankingText.text = "";
+        for (int i = 0; i < rankings.Count; i++)
+        {
+            rankingText.text += $"{i + 1}. {rankings[i].playerName} - {rankings[i].score}점\n";
+        }
+    }
    
+    public void HideRanking()
+    {
+        rankingPanel.SetActive(false);
+    }
 
 
     public void GameExit()
@@ -76,12 +106,9 @@ public class UIManager : MonoBehaviour
     
    
 
-    private void Awake()
-    {
-        // 싱글톤 패턴으로 어디서든 접근 가능하게
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-    }
+
+
+
 
     public void UpdateDay(int day)
     {
