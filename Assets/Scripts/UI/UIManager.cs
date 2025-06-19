@@ -26,6 +26,8 @@ public class UIManager : MonoBehaviour
     public Button gameStartButton;
     public GameObject rankingPanel;
     public TextMeshProUGUI rankingText;
+    public Transform rankingContent;
+    public GameObject rankingItemPrefab;
 
     [Header("³·°ú ¹ã UI")]
     public Image dayNightImage;
@@ -34,7 +36,10 @@ public class UIManager : MonoBehaviour
     public GameObject nightOverlay;
 
 
+    public Button rankingOpenButton;
+    public Button rankingCloseButton;
 
+    public RankingManager rankingManager;
 
 
     public GameObject helpUI;
@@ -50,12 +55,40 @@ public class UIManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else
         {
-             Destroy(gameObject);
+            Destroy(gameObject);
         }
 
-       
-    
-}
+        if (rankingOpenButton != null)
+            rankingOpenButton.onClick.AddListener(OpenRankingPanel);
+
+        if (rankingCloseButton != null)
+            rankingCloseButton.onClick.AddListener(CloseRankingPanel);
+
+    }
+
+    public void OpenRankingPanel()
+    {
+        rankingPanel.SetActive(true);
+
+        foreach (Transform child in rankingContent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        List<RankingEntry> rankings = rankingManager.currentData.rankings;
+
+        for (int i = 0; i < rankings.Count; i++)
+        {
+            GameObject item = Instantiate(rankingItemPrefab, rankingContent);
+            TextMeshProUGUI text = item.GetComponentInChildren<TextMeshProUGUI>();
+            text.text = $"{i + 1}.  {rankings[i].playerName} - {rankings[i].score}Á¡";
+        }
+    }
+
+    public void CloseRankingPanel()
+    {
+        rankingPanel.SetActive(false);
+    }
 
     public void GameStart()
     {
@@ -81,21 +114,24 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene("PlayScene");
     }
 
-    public void ShowRanking (List<RankingEntry> rankings)
+    public void ShowRanking(List<RankingEntry> rankings)
     {
-        rankingPanel.SetActive(true);
+        // ±âÁ¸ ·©Å· Ç×¸ñ Á¦°Å
+        foreach (Transform child in rankingContent)
+        {
+            Destroy(child.gameObject);
+        }
 
-        rankingText.text = "";
+        // »õ ·©Å· Ç×¸ñ Ãß°¡
         for (int i = 0; i < rankings.Count; i++)
         {
-            rankingText.text += $"{i + 1}. {rankings[i].playerName} - {rankings[i].score}Á¡\n";
+            GameObject item = Instantiate(rankingItemPrefab, rankingContent);
+            TextMeshProUGUI text = item.GetComponent<TextMeshProUGUI>();
+            text.text = $"{i + 1}. {rankings[i].playerName} - {rankings[i].score}Á¡";
         }
     }
-   
-    public void HideRanking()
-    {
-        rankingPanel.SetActive(false);
-    }
+
+
 
 
     public void GameExit()

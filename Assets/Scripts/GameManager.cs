@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
   public int score = 0;
     public int goalScore = 100;
     public int day = 1;
+    public int Gold = 0;
 
     public bool isNight = false;
     public bool hutOpen = false;
