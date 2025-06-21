@@ -19,4 +19,44 @@ public class ShopManager : MonoBehaviour
         { "º¹¼þ¾Æ", 15 },
         { "Æ÷µµ", 18 },
     };
+
+    private void Start()
+    {
+        shopPanel.SetActive(false);
+    }
+
+    public void OpenShop()
+    {
+        shopPanel.SetActive(true);
+        UpdateShopUI();
+    }
+
+    public void CloseShop()
+    {
+        shopPanel.SetActive(false);
+    }
+
+    public void UpdateShopUI()
+    {
+        shopText.text = "";
+        foreach(var item in InventoryManager.Instance.inventory)
+        {
+            string cropName = item.Key;
+            int amount = item.Value;
+            int price = cropPrices.ContainsKey(cropName) ? cropPrices[cropName] : 5;
+
+            shopText.text += $"{cropName} ({amount}°³) - °³´ç {price}°ñµå\n";
+
+        }
+
+        GoldText.text = "Gold : " + GameManager.Instance.Gold;
+
+    }
+
+    public void SellItem(string cropName)
+    {
+       
+    }
+
 }
+        
