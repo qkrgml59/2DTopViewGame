@@ -1,29 +1,24 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.SocialPlatforms.Impl;
 
 public class Player : MonoBehaviour
 {
     float moveSpeed = 2f;
-    public int cropCount = 0;         //Áö±İ±îÁö ¼öÈ®ÇÑ ÀÛ¹° ¼ö
-    public int totalScore = 0;        //ÇÃ·¹ÀÌ¾î°¡ ¸ğÀº ÃÑ Á¡¼ö
+    public int cropCount = 0;         //ì§€ê¸ˆê¹Œì§€ ìˆ˜í™•í•œ ì‘ë¬¼ ìˆ˜
+    public int totalScore = 0;        //í”Œë ˆì´ì–´ê°€ ëª¨ì€ ì´ ì ìˆ˜
 
-    [Header("¾Ö´Ï¸ŞÀÌ¼Ç ÇÁ·¹ÀÓµé")]
+    [Header("ì• ë‹ˆë©”ì´ì…˜ í”„ë ˆì„ë“¤")]
     public Sprite[] upSprites;
     public Sprite[] downSprites;
     public Sprite[] leftSprites;
     public Sprite[] rightSprites;
 
-    [Header("Ã¤Áı ÇÁ·¹ÀÓ")]
-    public Sprite[] harvestUpSprites;
-    public Sprite[] harvestDownSprites;
-    public Sprite[] harvestLeftSprites;
-    public Sprite[] harvestRightSprites;
-
-
-
+    [Header("ì±„ì§‘ í”„ë ˆì„")]
+    public Sprite harvestUp;
+    public Sprite harvestDown;
+    public Sprite harvestLeft;
+    public Sprite harvestRight;
 
     Rigidbody2D rb;
     SpriteRenderer sR;
@@ -36,11 +31,15 @@ public class Player : MonoBehaviour
     int animFrame = 0;
     float frameRate = 0.1f;
 
+    GameManager gameManager;   // ğŸ”¥ GameManager ì €ì¥ ë³€ìˆ˜
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         sR = GetComponent<SpriteRenderer>();
         rb.bodyType = RigidbodyType2D.Kinematic;
+
+        gameManager = FindObjectOfType<GameManager>();  // ğŸ”¥ GameManager í•œë²ˆë§Œ ì°¾ê¸°
     }
 
     private void Update()
@@ -50,30 +49,26 @@ public class Player : MonoBehaviour
 
         velocity = input.normalized * moveSpeed;
 
-        if (input.sqrMagnitude > 0.2f)
+        if (input.sqrMagnitude > 0.01f)
         {
             AnimateDirection();
         }
 
-        if (Input.GetKeyDown(KeyCode.Z))           //ÇÃ·¹ÀÌ¾î°¡ Z ¸¦ ´­·¶À» ¶§
+        if (Input.GetKeyDown(KeyCode.Z))           // í”Œë ˆì´ì–´ê°€ Zë¥¼ ëˆŒë €ì„ ë•Œ
         {
-            TryHarvest();                    //ÇÔ¼ö ¹ßµ¿
+            TryHarvest();                    // ì±„ì§‘ ì‹œë„
         }
     }
 
     private void FixedUpdate()
     {
-        rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
+        rb.velocity = velocity;  // âœ”ï¸ MovePosition ëŒ€ì‹  velocity ì‚¬ìš© (ë¬¼ ì¶©ëŒ ì ìš©)
     }
-
-
 
     void AnimateDirection()
     {
         if (input.sqrMagnitude > 0.01f)
         {
-
-
             animTimer += Time.deltaTime;
             if (animTimer >= frameRate)
             {
@@ -111,35 +106,32 @@ public class Player : MonoBehaviour
 
     void TryHarvest()
     {
-        //³·ÀÎÁö È®ÀÎ
-        if (!FindObjectOfType<DayNightController>().isDay)                    //ÇöÀç ¹ãÀÎÁö È®ÀÎ
+        // ğŸ”¥ GameManagerë¥¼ ì°¸ì¡°í•´ì„œ ë‚®/ë°¤ í™•ì¸
+        if (gameManager.isNight)
         {
-            Debug.Log("¹ã¿¡´Â Ã¤Áı ÇÒ ¼ö ¾ø½À´Ï´Ù.");
+            Debug.Log("ë°¤ì—ëŠ” ì±„ì§‘í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.1f);            //ÇÃ·¹ÀÌ¾î ÁÖº¯ 1.0 ¹İ°æÀÇ ¿ÀºêÁ§Æ®µéÀ» ¸ğµÎ °¡Á®¿È
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.5f);  // ì±„ì§‘ ë²”ìœ„ 0.5ë¡œ í™•ëŒ€
 
         foreach (var hit in hits)
         {
-            Crop crop = hit.GetComponent<Crop>();       //ÁÖº¯ ¿ÀºêÁ§Æ®µé Áß cropÀÌ ºÙ¾îÀÖ°í ¼öÈ® ¾È µÈ°Í¸¸ Ã¤Áı
+            Crop crop = hit.GetComponent<Crop>();  // Cropì´ ë¶™ì€ ì˜¤ë¸Œì íŠ¸ ì°¾ê¸°
             if (crop != null && !crop.isHarvested)
             {
-                crop.isHarvested = true;              //´Ù½Ã Ã¤Áı ¸øÇÏ°Ô ¼³Á¤
-                Destroy(crop.gameObject);                   //ÀÛ¹° Á¦°Å
-                cropCount++;                               //ÀÛ¹° ¼öÈ® ¼ö Áõ°¡
-                totalScore += crop.score;
+                crop.isHarvested = true;              // ì¬ì±„ì§‘ ë°©ì§€
+                Destroy(crop.gameObject);             // ì‘ë¬¼ ì œê±°
+                cropCount++;                          // ì‘ë¬¼ ìˆ˜ëŸ‰ ì¦ê°€
+                totalScore += crop.score;             // ì ìˆ˜ ì¶”ê°€
 
                 ShowHarvestAnimation();
-                // Ã¤Áı Á¡¼ö Ãß°¡
-                Debug.Log("ÀÛ¹° ¼öÈ® ÃÑ ¼öÈ® ¼ö : " + crop.score + "Á¡ | ÃÑ Á¡¼ö : " + totalScore);
-                //ÀúÀåµÈ Á¡¼ö ºÒ·¯¿À±â
 
+                // UI ì—…ë°ì´íŠ¸
                 UIManager.Instance.UpdateScore(totalScore);
+
+                Debug.Log("ì‘ë¬¼ ìˆ˜í™•! ì ìˆ˜: " + crop.score + " | ì´ ì ìˆ˜: " + totalScore);
                 return;
-
-                
-
             }
         }
     }
@@ -152,33 +144,18 @@ public class Player : MonoBehaviour
 
     IEnumerator HarvestRoutine()
     {
-        isHarvesting = true;
-        animFrame = 0;
-        animTimer = 0f;
-
-        Sprite[] currentHarvestSprites;
+        Sprite originalSprite = sR.sprite;
 
         if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
         {
-            currentHarvestSprites = input.x > 0 ? harvestRightSprites : harvestLeftSprites;
+            sR.sprite = input.x > 0 ? harvestRight : harvestLeft;
         }
         else
         {
-            currentHarvestSprites = input.y > 0 ? harvestUpSprites : harvestDownSprites;
+            sR.sprite = input.y > 0 ? harvestUp : harvestDown;
         }
 
-        float duration = currentHarvestSprites.Length * frameRate;
-
-        while (animTimer < duration)
-        {
-            int index = Mathf.FloorToInt(animTimer / frameRate);
-            index = Mathf.Clamp(index, 0, currentHarvestSprites.Length - 1);
-            sR.sprite = currentHarvestSprites[index];
-
-            animTimer += Time.deltaTime;
-            yield return null;
-        }
-
-        isHarvesting = false;
+        yield return new WaitForSeconds(0.2f);
+        sR.sprite = originalSprite;
     }
 }

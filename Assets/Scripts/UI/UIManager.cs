@@ -95,8 +95,8 @@ public class UIManager : MonoBehaviour
         // gameStartButton.onClick.AddListener(OnGameStartButtonClicked);
         SceneManager.LoadScene("PlayScene");
     }
-
-    private void OnGameStartButtonClicked()
+    
+    public void OnGameStartButtonClicked()
     {
 
         string playerName = inputField.text;

@@ -55,7 +55,21 @@ public class ShopManager : MonoBehaviour
 
     public void SellItem(string cropName)
     {
-       
+        if (InventoryManager.Instance.inventory.ContainsKey(cropName) && InventoryManager.Instance.inventory[cropName] > 0)
+        {
+            int price = cropPrices.ContainsKey(cropName) ? cropPrices[cropName] : 5;
+
+            InventoryManager.Instance.inventory[cropName]--;
+            GameManager.Instance.Gold += price;
+
+            if (InventoryManager.Instance.inventory[cropName] <= 0)
+            {
+                InventoryManager.Instance.inventory.Remove(cropName);
+            }
+
+            InventoryManager.Instance.UpdateInventoryUI();
+            UpdateShopUI();
+        }
     }
 
 }

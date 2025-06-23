@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,8 +17,8 @@ public class GameManager : MonoBehaviour
     public bool hutOpen = false;
     public GameObject hutDoor;
 
-    public int timer = 0;      //초 단위 누적 시간
-    public int dayDuration = 10;    //낮 지속 시간 (초)
+    public int timer = 20;      //초 단위 누적 시간
+    public int dayDuration = 20;    //낮 지속 시간 (초)
     public int nightDuration = 10;   //밤 지속 시간 (초)
 
     private float secondCounter = 0f;     // 1초 단위 체크용
@@ -25,13 +26,26 @@ public class GameManager : MonoBehaviour
    
 
     public GameObject[] cropPrefabs;       //작물 프리팹 7개
-    public Transform[] cropSpawnPoints;     // 작물 생성 위치들
+         // 작물 생성 위치들
+
+    private List<SpawnPoint> cropSpawnPoints = new List<SpawnPoint>();
 
 
     // Start is called before the first frame update
     void Start()
     {
-        SpawnCrops();     //첫 날 시작할 때 작물 생성
+        GameObject[] spawnObjects = GameObject.FindGameObjectsWithTag("SpawnPoint");
+
+        foreach (GameObject obj in spawnObjects)
+        {
+            SpawnPoint spawnPoint = obj.GetComponent<SpawnPoint>();
+            if (spawnPoint != null)
+            {
+                cropSpawnPoints.Add(spawnPoint);
+            }
+        }
+
+        SpawnCrops();
     }
 
    
@@ -42,36 +56,42 @@ public class GameManager : MonoBehaviour
     {
 
         secondCounter += Time.deltaTime;
+
         if (secondCounter >= 1f)
         {
             secondCounter = 0f;
-            timer++;
 
+            if (!isNight)
+            {
+                // 낮: 시간이 감소
+                timer--;
+
+                if (timer <= 0)
+                {
+                    isNight = true;
+                    timer = 0;
+                    Debug.Log("밤 시작");
+                }
+            }
+            else
+            {
+                // 밤: 시간이 증가
+                timer++;
+
+                if (timer >= nightDuration)
+                {
+                    isNight = false;
+                    day++;
+                    timer = dayDuration;
+                    Debug.Log("다음 날 : " + day);
+                    SpawnCrops();
+                }
+            }
+
+            UIManager.Instance.UpdateDay(day);
+            UIManager.Instance.UpdateDayNightUI(isNight);
             UIManager.Instance.UpdateTimer(timer);
-
-            if (!isNight && timer >= dayDuration)
-            {
-
-                // 낮 종료 밤 시작
-                isNight = true;
-                timer = 0;
-                Debug.Log("밤 시작");
-
-                UIManager.Instance.UpdateDayNightUI(isNight);
-            }
-            else if (isNight && timer >= nightDuration)
-            {
-
-                //밤 종료 낮 시작 + 다음날
-                isNight = false;
-                timer = 0;
-                day++;
-                Debug.Log("다음 날 : " + day);
-
-                UIManager.Instance.UpdateDay(day);
-                UIManager.Instance.UpdateDayNightUI(isNight);
-                SpawnCrops();
-            }
+           
         }
 
         //밤에 목표 점수 달성시 오두막 문 열기
@@ -94,19 +114,20 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public void SpawnCrops()              //작물 생성 함수
+    public void SpawnCrops()
     {
+        // 기존 작물 삭제
         GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("Crop");
         foreach (GameObject crop in oldCrops)
         {
             Destroy(crop);
         }
-        
-        for (int i = 0; i < Mathf.Min(cropSpawnPoints.Length, cropPrefabs.Length); i++)
-            {
-            Instantiate(cropPrefabs[i], cropSpawnPoints[i].position, Quaternion.identity);
-            }
 
+        // 스폰 포인트마다 설정된 작물 생성
+        foreach (SpawnPoint spawnPoint in cropSpawnPoints)
+        {
+            Instantiate(spawnPoint.cropPrefab, spawnPoint.transform.position, Quaternion.identity);
+        }
     }
 
     public void NextDay()

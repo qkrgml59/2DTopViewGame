@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Crop
+  - Water
+  - Enemy
+  - Boundary
+  - SpawnPoint
   layers:
   - Default
   - TransparentFX
@@ -12,11 +16,11 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Enemy
+  - Boundary
+  - Ground001
+  - Ground002
   - 
   - 
   - 
