@@ -4,25 +4,12 @@ using UnityEngine;
 
 public class Crop : MonoBehaviour
 {
-    public int score = 10;               //이 작물의 점수
-    public bool isHarvested = false;  // 이미 수확된건지 확인
+    public string cropName; // 작물 이름
+    public int score;       // 작물 점수
+    public bool isHarvested = false; // 수확 여부
 
-    public string cropName = "감자";
-
-    private void OnMouseDown()
+    private void Start()
     {
-        InventoryManager.Instance.AddItem(cropName);
-        Destroy(gameObject);
-    }
-
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        // 필요하면 초기화
     }
 }

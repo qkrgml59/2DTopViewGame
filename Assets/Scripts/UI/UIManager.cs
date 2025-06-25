@@ -45,6 +45,11 @@ public class UIManager : MonoBehaviour
     public GameObject helpUI;
     public GameObject RankingUI;
 
+    public GameObject shopPanel;
+
+    
+
+
     private void Start()
     {
         Instance = this;
@@ -140,7 +145,10 @@ public class UIManager : MonoBehaviour
     }
 
     
-   
+   public void ShowShopUI(bool isOpen)
+    {
+        shopPanel.SetActive(isOpen);
+    }
 
 
 

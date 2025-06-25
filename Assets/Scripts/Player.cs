@@ -1,12 +1,13 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+using System.Collections; // 이거 꼭 있어야 함 (IEnumerator를 인식하려면 필수)
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    float moveSpeed = 2f;
-    public int cropCount = 0;         //지금까지 수확한 작물 수
-    public int totalScore = 0;        //플레이어가 모은 총 점수
+    public float moveSpeed = 2f;
+    public float harvestRange = 0.5f; // 채집 범위
+    public int cropCount = 0;
+    public int totalScore = 0;
 
     [Header("애니메이션 프레임들")]
     public Sprite[] upSprites;
@@ -26,12 +27,13 @@ public class Player : MonoBehaviour
     Vector2 input;
     Vector2 velocity;
 
-    bool isHarvesting = false;
     float animTimer = 0f;
     int animFrame = 0;
     float frameRate = 0.1f;
 
-    GameManager gameManager;   // 🔥 GameManager 저장 변수
+    public int money = 0;
+
+    GameManager gameManager;
 
     private void Awake()
     {
@@ -39,7 +41,7 @@ public class Player : MonoBehaviour
         sR = GetComponent<SpriteRenderer>();
         rb.bodyType = RigidbodyType2D.Kinematic;
 
-        gameManager = FindObjectOfType<GameManager>();  // 🔥 GameManager 한번만 찾기
+        gameManager = FindObjectOfType<GameManager>();
     }
 
     private void Update()
@@ -49,20 +51,20 @@ public class Player : MonoBehaviour
 
         velocity = input.normalized * moveSpeed;
 
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            TryHarvest();  // ⭐️ 이거 호출하면 됨
+        }
+
         if (input.sqrMagnitude > 0.01f)
         {
             AnimateDirection();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Z))           // 플레이어가 Z를 눌렀을 때
-        {
-            TryHarvest();                    // 채집 시도
         }
     }
 
     private void FixedUpdate()
     {
-        rb.velocity = velocity;  // ✔️ MovePosition 대신 velocity 사용 (물 충돌 적용)
+        rb.velocity = velocity;
     }
 
     void AnimateDirection()
@@ -78,17 +80,11 @@ public class Player : MonoBehaviour
 
             if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
             {
-                if (input.x > 0)
-                    sR.sprite = rightSprites[animFrame % rightSprites.Length];
-                else
-                    sR.sprite = leftSprites[animFrame % leftSprites.Length];
+                sR.sprite = input.x > 0 ? rightSprites[animFrame % rightSprites.Length] : leftSprites[animFrame % leftSprites.Length];
             }
             else
             {
-                if (input.y > 0)
-                    sR.sprite = upSprites[animFrame % upSprites.Length];
-                else
-                    sR.sprite = downSprites[animFrame % downSprites.Length];
+                sR.sprite = input.y > 0 ? upSprites[animFrame % upSprites.Length] : downSprites[animFrame % downSprites.Length];
             }
         }
         else
@@ -106,31 +102,34 @@ public class Player : MonoBehaviour
 
     void TryHarvest()
     {
-        // 🔥 GameManager를 참조해서 낮/밤 확인
         if (gameManager.isNight)
         {
             Debug.Log("밤에는 채집할 수 없습니다.");
             return;
         }
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.5f);  // 채집 범위 0.5로 확대
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, harvestRange);
 
         foreach (var hit in hits)
         {
-            Crop crop = hit.GetComponent<Crop>();  // Crop이 붙은 오브젝트 찾기
+            Crop crop = hit.GetComponent<Crop>();
             if (crop != null && !crop.isHarvested)
             {
-                crop.isHarvested = true;              // 재채집 방지
-                Destroy(crop.gameObject);             // 작물 제거
-                cropCount++;                          // 작물 수량 증가
-                totalScore += crop.score;             // 점수 추가
+                crop.isHarvested = true;
+
+                Destroy(crop.gameObject);
+
+                
+                
 
                 ShowHarvestAnimation();
 
-                // UI 업데이트
-                UIManager.Instance.UpdateScore(totalScore);
+                // 인벤토리, UI 업데이트
+                InventoryManager.Instance.AddItem(crop.cropName);
+                
 
-                Debug.Log("작물 수확! 점수: " + crop.score + " | 총 점수: " + totalScore);
+                Debug.Log($"작물 수확! {crop.cropName} - {crop.score}점 | 총 점수: {totalScore}");
+
                 return;
             }
         }
@@ -157,5 +156,24 @@ public class Player : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
         sR.sprite = originalSprite;
+    }
+
+    // 채집 범위 업그레이드 함수
+    public void IncreaseHarvestRange(float amount)
+    {
+        harvestRange += amount;
+        Debug.Log("채집 범위 증가! 현재 채집 범위: " + harvestRange);
+    }
+
+    public void IncreaseMoveSpeed(float amount)
+    {
+        moveSpeed += amount;
+        Debug.Log("이동 속도 증가 현재 속도 : " + moveSpeed);
+    }
+
+    public void AddMoney(int amount)
+    {
+        money += amount;
+        Debug.Log("현재 돈: " + money);
     }
 }

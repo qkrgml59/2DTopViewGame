@@ -1,34 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class ShopManager : MonoBehaviour
 {
     public GameObject shopPanel;
-    public TextMeshProUGUI shopText;
-    public TextMeshProUGUI GoldText;
+    public TextMeshProUGUI shopInventoryText;
 
-    public Dictionary<string, int> cropPrices = new Dictionary<string, int>()
+    private void OnEnable()
     {
-        { "당근", 5 },
-        { "감자", 7 },
-        { "고구마", 10 },
-        { "옥수수", 12 },
-        { "사과", 13 },
-        { "복숭아", 15 },
-        { "포도", 18 },
-    };
-
-    private void Start()
-    {
-        shopPanel.SetActive(false);
+        UpdateShopUI();
     }
 
-    public void OpenShop()
+    // 인벤토리 UI 갱신
+    public void UpdateShopUI()
     {
-        shopPanel.SetActive(true);
-        UpdateShopUI();
+        if (shopInventoryText == null)
+            return;
+
+        shopInventoryText.text = "판매 가능한 작물:\n";
+
+        foreach (var item in InventoryManager.Instance.GetInventoryItems())
+        {
+            shopInventoryText.text += $"{item.Key} : {item.Value}개\n";
+        }
+    }
+
+    // 판매 버튼
+    public void OnSellAllButtonClicked()
+    {
+        InventoryManager.Instance.SellAllItems();
+        UpdateShopUI(); // 판매 후 UI 갱신
+        CloseShop();
     }
 
     public void CloseShop()
@@ -36,41 +38,4 @@ public class ShopManager : MonoBehaviour
         shopPanel.SetActive(false);
     }
 
-    public void UpdateShopUI()
-    {
-        shopText.text = "";
-        foreach(var item in InventoryManager.Instance.inventory)
-        {
-            string cropName = item.Key;
-            int amount = item.Value;
-            int price = cropPrices.ContainsKey(cropName) ? cropPrices[cropName] : 5;
-
-            shopText.text += $"{cropName} ({amount}개) - 개당 {price}골드\n";
-
-        }
-
-        GoldText.text = "Gold : " + GameManager.Instance.Gold;
-
-    }
-
-    public void SellItem(string cropName)
-    {
-        if (InventoryManager.Instance.inventory.ContainsKey(cropName) && InventoryManager.Instance.inventory[cropName] > 0)
-        {
-            int price = cropPrices.ContainsKey(cropName) ? cropPrices[cropName] : 5;
-
-            InventoryManager.Instance.inventory[cropName]--;
-            GameManager.Instance.Gold += price;
-
-            if (InventoryManager.Instance.inventory[cropName] <= 0)
-            {
-                InventoryManager.Instance.inventory.Remove(cropName);
-            }
-
-            InventoryManager.Instance.UpdateInventoryUI();
-            UpdateShopUI();
-        }
-    }
-
 }
-        
