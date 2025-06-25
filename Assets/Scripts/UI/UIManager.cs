@@ -35,6 +35,9 @@ public class UIManager : MonoBehaviour
     public Sprite nightSprite;
     public GameObject nightOverlay;
 
+    [Header("게임 클리어 UI")]
+    public GameObject gameClearPanel;
+
 
     public Button rankingOpenButton;
     public Button rankingCloseButton;
@@ -47,7 +50,7 @@ public class UIManager : MonoBehaviour
 
     public GameObject shopPanel;
 
-    
+    public GameObject goldWarningUI;
 
 
     private void Start()
@@ -90,6 +93,17 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void ShowGoldWarning()
+    {
+        goldWarningUI.SetActive(true);
+        Invoke("HideGoldWarning", 1.5f); // 1.5초 후 자동 숨김
+    }
+
+    void HideGoldWarning()
+    {
+        goldWarningUI.SetActive(false);
+    }
+
     public void CloseRankingPanel()
     {
         rankingPanel.SetActive(false);
@@ -97,10 +111,15 @@ public class UIManager : MonoBehaviour
 
     public void GameStart()
     {
-        // gameStartButton.onClick.AddListener(OnGameStartButtonClicked);
+        
         SceneManager.LoadScene("PlayScene");
     }
-    
+
+    public void GoToTitle()
+    {
+        SceneManager.LoadScene("Level_0"); // 시작 화면 씬 이름 넣기
+    }
+
     public void OnGameStartButtonClicked()
     {
 
@@ -121,7 +140,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowRanking(List<RankingEntry> rankings)
     {
-        // 기존 랭킹 항목 제거
+        
         foreach (Transform child in rankingContent)
         {
             Destroy(child.gameObject);
@@ -136,7 +155,13 @@ public class UIManager : MonoBehaviour
         }
     }
 
-
+    public void ShowGameClearUI()
+    {
+        if (gameClearPanel !=null)
+        {
+            gameClearPanel.SetActive(true);
+        }
+    }
 
 
     public void GameExit()

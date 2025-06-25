@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
-using System.Collections; // 이거 꼭 있어야 함 (IEnumerator를 인식하려면 필수)
-using System.Collections.Generic;
+using System.Collections;
 
 public class Player : MonoBehaviour
 {
-    public float moveSpeed = 2f;
-    public float harvestRange = 0.5f; // 채집 범위
-    public int cropCount = 0;
+    public float moveSpeed = 1f;
+    public float harvestRange = 0.5f;
+
+    public int money = 0;
     public int totalScore = 0;
 
     [Header("애니메이션 프레임들")]
@@ -31,8 +31,6 @@ public class Player : MonoBehaviour
     int animFrame = 0;
     float frameRate = 0.1f;
 
-    public int money = 0;
-
     GameManager gameManager;
 
     private void Awake()
@@ -40,6 +38,10 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sR = GetComponent<SpriteRenderer>();
         rb.bodyType = RigidbodyType2D.Kinematic;
+
+        // 강화된 값 불러오기
+        moveSpeed = PlayerPrefs.GetFloat("MoveSpeed", 2f);
+        harvestRange = PlayerPrefs.GetFloat("HarvestRange", 0.5f);
 
         gameManager = FindObjectOfType<GameManager>();
     }
@@ -53,7 +55,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            TryHarvest();  // ⭐️ 이거 호출하면 됨
+            TryHarvest();
         }
 
         if (input.sqrMagnitude > 0.01f)
@@ -119,20 +121,43 @@ public class Player : MonoBehaviour
 
                 Destroy(crop.gameObject);
 
-                
-                
-
                 ShowHarvestAnimation();
 
-                // 인벤토리, UI 업데이트
                 InventoryManager.Instance.AddItem(crop.cropName);
-                
 
-                Debug.Log($"작물 수확! {crop.cropName} - {crop.score}점 | 총 점수: {totalScore}");
+                Debug.Log($"작물 수확! {crop.cropName}");
 
                 return;
             }
         }
+    }
+
+    public void AddScore(int amount)
+    {
+        totalScore += amount;
+        UIManager.Instance.UpdateScore(totalScore);
+
+        GameManager.Instance.CheckScore(totalScore);
+    }
+
+    
+
+    public void IncreaseHarvestRange(float amount)
+    {
+        harvestRange += amount;
+        PlayerPrefs.SetFloat("HarvestRange", harvestRange);
+        PlayerPrefs.Save();
+
+        Debug.Log("채집 범위 증가! 현재 채집 범위: " + harvestRange);
+    }
+
+    public void IncreaseMoveSpeed(float amount)
+    {
+        moveSpeed += amount;
+        PlayerPrefs.SetFloat("MoveSpeed", moveSpeed);
+        PlayerPrefs.Save();
+
+        Debug.Log("이동 속도 증가! 현재 이동 속도: " + moveSpeed);
     }
 
     void ShowHarvestAnimation()
@@ -156,24 +181,5 @@ public class Player : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
         sR.sprite = originalSprite;
-    }
-
-    // 채집 범위 업그레이드 함수
-    public void IncreaseHarvestRange(float amount)
-    {
-        harvestRange += amount;
-        Debug.Log("채집 범위 증가! 현재 채집 범위: " + harvestRange);
-    }
-
-    public void IncreaseMoveSpeed(float amount)
-    {
-        moveSpeed += amount;
-        Debug.Log("이동 속도 증가 현재 속도 : " + moveSpeed);
-    }
-
-    public void AddMoney(int amount)
-    {
-        money += amount;
-        Debug.Log("현재 돈: " + money);
     }
 }

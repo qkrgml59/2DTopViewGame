@@ -680,7 +680,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 289479438}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 878451605}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: GameExit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &289479438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1511,11 +1523,14 @@ MonoBehaviour:
   daySprite: {fileID: 0}
   nightSprite: {fileID: 0}
   nightOverlay: {fileID: 0}
+  gameClearPanel: {fileID: 0}
   rankingOpenButton: {fileID: 79644294}
   rankingCloseButton: {fileID: 408354418}
   rankingManager: {fileID: 1479445871}
   helpUI: {fileID: 0}
   RankingUI: {fileID: 1964599720}
+  shopPanel: {fileID: 0}
+  goldWarningUI: {fileID: 0}
 --- !u!4 &878451606
 Transform:
   m_ObjectHideFlags: 0

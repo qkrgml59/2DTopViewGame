@@ -11,7 +11,7 @@ public class ShopManager : MonoBehaviour
         UpdateShopUI();
     }
 
-    // 인벤토리 UI 갱신
+    // 상점 UI 업데이트
     public void UpdateShopUI()
     {
         if (shopInventoryText == null)
@@ -29,7 +29,7 @@ public class ShopManager : MonoBehaviour
     public void OnSellAllButtonClicked()
     {
         InventoryManager.Instance.SellAllItems();
-        UpdateShopUI(); // 판매 후 UI 갱신
+        UpdateShopUI(); // 판매 후 바로 갱신
         CloseShop();
     }
 

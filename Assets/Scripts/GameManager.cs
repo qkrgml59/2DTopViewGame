@@ -1,38 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.VFX;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
 
-    
-  public int score = 0;
+    public int score = 0;
     public int goalScore = 100;
     public int day = 1;
-    public int Gold = 0;
 
     public bool isNight = false;
     public bool hutOpen = false;
+
     public GameObject hutDoor;
 
-    public int timer = 20;      //초 단위 누적 시간
-    public int dayDuration = 20;    //낮 지속 시간 (초)
-    public int nightDuration = 10;   //밤 지속 시간 (초)
+    public int timer = 20;
+    public int dayDuration = 20;
+    public int nightDuration = 10;
 
-    private float secondCounter = 0f;     // 1초 단위 체크용
-    public static GameManager Instance;
-   
+    private float secondCounter = 0f;
 
-    public GameObject[] cropPrefabs;       //작물 프리팹 7개
-         // 작물 생성 위치들
+    public GameObject[] cropPrefabs;
 
     private List<SpawnPoint> cropSpawnPoints = new List<SpawnPoint>();
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         GameObject[] spawnObjects = GameObject.FindGameObjectsWithTag("SpawnPoint");
 
@@ -48,13 +48,8 @@ public class GameManager : MonoBehaviour
         SpawnCrops();
     }
 
-   
-
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-
         secondCounter += Time.deltaTime;
 
         if (secondCounter >= 1f)
@@ -63,7 +58,6 @@ public class GameManager : MonoBehaviour
 
             if (!isNight)
             {
-                // 낮: 시간이 감소
                 timer--;
 
                 if (timer <= 0)
@@ -75,7 +69,6 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // 밤: 시간이 증가
                 timer++;
 
                 if (timer >= nightDuration)
@@ -83,6 +76,7 @@ public class GameManager : MonoBehaviour
                     isNight = false;
                     day++;
                     timer = dayDuration;
+
                     Debug.Log("다음 날 : " + day);
                     SpawnCrops();
                 }
@@ -91,42 +85,16 @@ public class GameManager : MonoBehaviour
             UIManager.Instance.UpdateDay(day);
             UIManager.Instance.UpdateDayNightUI(isNight);
             UIManager.Instance.UpdateTimer(timer);
-           
         }
+    }
 
-        //밤에 목표 점수 달성시 오두막 문 열기
-        if (isNight && score >= goalScore)
+    public void CheckScore(int currentScore)
+    {
+        if (currentScore >= goalScore && !hutOpen)
         {
             hutOpen = true;
-            hutDoor.SetActive(false); // 문 비활성화 = 열린 상태
-        }
-        else if (isNight)
-        {
-            hutOpen = false;
-            hutDoor.SetActive(true);
-        }
-    }
-
-    private void Awake()
-    {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-    }
-
-
-    public void SpawnCrops()
-    {
-        // 기존 작물 삭제
-        GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("Crop");
-        foreach (GameObject crop in oldCrops)
-        {
-            Destroy(crop);
-        }
-
-        // 스폰 포인트마다 설정된 작물 생성
-        foreach (SpawnPoint spawnPoint in cropSpawnPoints)
-        {
-            Instantiate(spawnPoint.cropPrefab, spawnPoint.transform.position, Quaternion.identity);
+            hutDoor.SetActive(false); // 문 열기
+            Debug.Log("점수 도달 문이 열렸습니다.");
         }
     }
 
@@ -139,15 +107,33 @@ public class GameManager : MonoBehaviour
             score = 0;
             hutOpen = false;
             hutDoor.SetActive(true);
-            timer = 0;
+            timer = dayDuration;
 
-            Debug.Log("다음 날로 넘어갑니다. 현재 일수 " + day);
+            goalScore += 50; // 목표 점수 +50씩 증가
+
+            Debug.Log("다음 날로 넘어갑니다. 현재 일수: " + day + " | 새로운 목표 점수: " + goalScore);
 
             SpawnCrops();
         }
         else
         {
             Debug.Log("목표 점수에 도달하지 못해서 오두막 문이 닫혀 있습니다.");
+        }
+    }
+
+    public void SpawnCrops()
+    {
+        // 기존 작물 삭제
+        GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("Crop");
+        foreach (GameObject crop in oldCrops)
+        {
+            Destroy(crop);
+        }
+
+        // 스폰 포인트마다 작물 생성
+        foreach (SpawnPoint spawnPoint in cropSpawnPoints)
+        {
+            Instantiate(spawnPoint.cropPrefab, spawnPoint.transform.position, Quaternion.identity);
         }
     }
 
@@ -158,6 +144,19 @@ public class GameManager : MonoBehaviour
         FindObjectOfType<RankingManager>().AddRanking(playerName, score);
 
         UIManager.Instance.ShowRanking(FindObjectOfType<RankingManager>().currentData.rankings);
+
+        InventoryManager.Instance.SaveGold();
+
+        SceneManager.LoadScene("GameOverScene");
     }
 
+    public void StartNight()
+    {
+        isNight = true;
+    }
+
+    public void StartDay()
+    {
+        isNight = false;
+    }
 }
