@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -26,10 +25,21 @@ public class GameManager : MonoBehaviour
 
     private List<SpawnPoint> cropSpawnPoints = new List<SpawnPoint>();
 
+    // âœ… Player ìºì‹±
+    private GameObject player;
+    private SpriteRenderer playerSR;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // âœ… Player ë ˆí¼ëŸ°ìŠ¤ ë¯¸ë¦¬ ì €ì¥ (SetActive(false)ì—¬ë„ ì°¸ì¡° ê°€ëŠ¥)
+        player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            playerSR = player.GetComponent<SpriteRenderer>();
+        }
     }
 
     private void Start()
@@ -64,7 +74,7 @@ public class GameManager : MonoBehaviour
                 {
                     isNight = true;
                     timer = 0;
-                    Debug.Log("¹ã ½ÃÀÛ");
+                    Debug.Log("ë°¤ ì‹œì‘");
                 }
             }
             else
@@ -76,8 +86,9 @@ public class GameManager : MonoBehaviour
                     isNight = false;
                     day++;
                     timer = dayDuration;
+                    
 
-                    Debug.Log("´ÙÀ½ ³¯ : " + day);
+                    Debug.Log("ë‹¤ìŒ ë‚  : " + day);
                     SpawnCrops();
                 }
             }
@@ -93,8 +104,8 @@ public class GameManager : MonoBehaviour
         if (currentScore >= goalScore && !hutOpen)
         {
             hutOpen = true;
-            hutDoor.SetActive(false); // ¹® ¿­±â
-            Debug.Log("Á¡¼ö µµ´Ş ¹®ÀÌ ¿­·È½À´Ï´Ù.");
+            hutDoor.SetActive(false);
+            Debug.Log("ì ìˆ˜ ë„ë‹¬ ë¬¸ì´ ì—´ë ¸ìŠµë‹ˆë‹¤.");
         }
     }
 
@@ -105,32 +116,54 @@ public class GameManager : MonoBehaviour
             isNight = false;
             day++;
             score = 0;
+            UIManager.Instance.UpdateScore(score);
             hutOpen = false;
             hutDoor.SetActive(true);
             timer = dayDuration;
 
-            goalScore += 50; // ¸ñÇ¥ Á¡¼ö +50¾¿ Áõ°¡
+            goalScore += 50;
 
-            Debug.Log("´ÙÀ½ ³¯·Î ³Ñ¾î°©´Ï´Ù. ÇöÀç ÀÏ¼ö: " + day + " | »õ·Î¿î ¸ñÇ¥ Á¡¼ö: " + goalScore);
+            Debug.Log("ë‹¤ìŒ ë‚ ë¡œ ë„˜ì–´ê°‘ë‹ˆë‹¤. í˜„ì¬ ì¼ìˆ˜: " + day + " | ìƒˆë¡œìš´ ëª©í‘œ ì ìˆ˜: " + goalScore);
 
             SpawnCrops();
+
+            // âœ… í”Œë ˆì´ì–´ ë³µêµ¬
+            Debug.Log("í”Œë ˆì´ì–´ ë³µêµ¬ ì‹œë„");
+
+            if (player == null)
+            {
+                Debug.LogWarning("Playerë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤!");
+            }
+            else
+            {
+                player.SetActive(true);
+                Debug.Log("í”Œë ˆì´ì–´ í™œì„±í™” ì„±ê³µ");
+
+                if (playerSR != null)
+                {
+                    playerSR.color = new Color(1f, 1f, 1f, 1f); // ì™„ì „ ë¶ˆíˆ¬ëª…
+                    Debug.Log("ì•ŒíŒŒê°’ ë³µì› ì™„ë£Œ");
+                }
+                else
+                {
+                    Debug.LogWarning("SpriteRendererê°€ ì—†ìŠµë‹ˆë‹¤!");
+                }
+            }
         }
         else
         {
-            Debug.Log("¸ñÇ¥ Á¡¼ö¿¡ µµ´ŞÇÏÁö ¸øÇØ¼­ ¿ÀµÎ¸· ¹®ÀÌ ´İÇô ÀÖ½À´Ï´Ù.");
+            Debug.Log("ëª©í‘œ ì ìˆ˜ì— ë„ë‹¬í•˜ì§€ ëª»í•´ì„œ ì˜¤ë‘ë§‰ ë¬¸ì´ ë‹«í˜€ ìˆìŠµë‹ˆë‹¤.");
         }
     }
 
     public void SpawnCrops()
     {
-        // ±âÁ¸ ÀÛ¹° »èÁ¦
         GameObject[] oldCrops = GameObject.FindGameObjectsWithTag("Crop");
         foreach (GameObject crop in oldCrops)
         {
             Destroy(crop);
         }
 
-        // ½ºÆù Æ÷ÀÎÆ®¸¶´Ù ÀÛ¹° »ı¼º
         foreach (SpawnPoint spawnPoint in cropSpawnPoints)
         {
             Instantiate(spawnPoint.cropPrefab, spawnPoint.transform.position, Quaternion.identity);
@@ -141,11 +174,24 @@ public class GameManager : MonoBehaviour
     {
         string playerName = PlayerPrefs.GetString("PlayerName", "Unknown");
 
-        FindObjectOfType<RankingManager>().AddRanking(playerName, score);
+        RankingManager rankingManager = FindObjectOfType<RankingManager>();
+        if (rankingManager != null)
+        {
+            rankingManager.AddRanking(playerName, score);
+            UIManager.Instance.ShowRanking(rankingManager.currentData.rankings);
+        }
+        else
+        {
+            Debug.LogWarning("RankingManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+        }
 
-        UIManager.Instance.ShowRanking(FindObjectOfType<RankingManager>().currentData.rankings);
+        InventoryManager inventoryManager = FindObjectOfType<InventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.SaveGold();
+        }
 
-        InventoryManager.Instance.SaveGold();
+        Debug.Log("ê²Œì„ì˜¤ë²„ - ì”¬ ì „í™˜");
 
         SceneManager.LoadScene("GameOverScene");
     }

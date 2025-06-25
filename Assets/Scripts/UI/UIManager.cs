@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using UnityEditorInternal.Profiling.Memory.Experimental.FileFormat;
+//using UnityEditorInternal.Profiling.Memory.Experimental.FileFormat;
 using UnityEngine.SceneManagement;
 using UnityEditor;
 using UnityEngine.UI;
@@ -92,6 +92,8 @@ public class UIManager : MonoBehaviour
             text.text = $"{i + 1}.  {rankings[i].playerName} - {rankings[i].score}Á¡";
         }
     }
+
+
 
     public void ShowGoldWarning()
     {
