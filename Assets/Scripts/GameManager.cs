@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     private List<SpawnPoint> cropSpawnPoints = new List<SpawnPoint>();
 
-    // ✅ Player 캐싱
+  
     private GameObject player;
     private SpriteRenderer playerSR;
 
@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        // ✅ Player 레퍼런스 미리 저장 (SetActive(false)여도 참조 가능)
+       
         player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
@@ -127,7 +127,7 @@ public class GameManager : MonoBehaviour
 
             SpawnCrops();
 
-            // ✅ 플레이어 복구
+           
             Debug.Log("플레이어 복구 시도");
 
             if (player == null)
@@ -174,17 +174,18 @@ public class GameManager : MonoBehaviour
     {
         string playerName = PlayerPrefs.GetString("PlayerName", "Unknown");
 
+     
         RankingManager rankingManager = FindObjectOfType<RankingManager>();
         if (rankingManager != null)
         {
-            rankingManager.AddRanking(playerName, score);
-            UIManager.Instance.ShowRanking(rankingManager.currentData.rankings);
+            rankingManager.AddRanking(playerName, score); // 랭킹 추가 & 저장
         }
         else
         {
             Debug.LogWarning("RankingManager를 찾을 수 없습니다.");
         }
 
+      
         InventoryManager inventoryManager = FindObjectOfType<InventoryManager>();
         if (inventoryManager != null)
         {
@@ -194,6 +195,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("게임오버 - 씬 전환");
 
         SceneManager.LoadScene("GameOverScene");
+
+
     }
 
     public void StartNight()

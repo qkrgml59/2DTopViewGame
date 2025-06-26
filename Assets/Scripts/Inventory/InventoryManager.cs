@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,6 +35,10 @@ public class InventoryManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
+
+
+        ResetAllData();
+
 
         // 작물 아이콘 세팅
         cropIcons.Add("당근", carrotIcon);
@@ -130,6 +135,25 @@ public class InventoryManager : MonoBehaviour
         PlayerPrefs.SetInt("PlayerGold", playerGold);
         PlayerPrefs.Save();
     }
+    public void ResetAllData()
+    {
+        // 골드 초기화
+        PlayerPrefs.SetInt("PlayerGold", 0);
+        PlayerPrefs.Save();
+        Debug.Log("골드 초기화 완료");
+
+        // 랭킹 초기화
+        string rankingPath = Path.Combine(Application.persistentDataPath, "ranking.json");
+        if (File.Exists(rankingPath))
+        {
+            File.Delete(rankingPath);
+            Debug.Log("랭킹 데이터 삭제 완료");
+        }
+        else
+        {
+            Debug.Log("랭킹 데이터 파일이 존재하지 않습니다.");
+        }
+    }
 
     public void LoadGold()
     {
@@ -196,13 +220,12 @@ public class InventoryManager : MonoBehaviour
             totalScoreToAdd += cropScore * item.Value;
         }
 
-        // 골드를 여기서 더하고 UI 갱신
         playerGold += totalGold;
 
-        // UI 즉시 업데이트
+       
         goldText.text = $"Gold: {playerGold}G";
 
-        // 점수는 플레이어에 반영
+     
         Player player = FindObjectOfType<Player>();
         player.AddScore(totalScoreToAdd);
 

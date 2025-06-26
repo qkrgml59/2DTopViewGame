@@ -19,12 +19,26 @@ public class RankingData
 
 public class RankingManager : MonoBehaviour
 {
+    public static RankingManager Instance;
+
     public RankingData currentData = new RankingData();
 
     private string filePath;
 
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);  // 씬 넘어가도 살아있게 만들기
+            filePath = Path.Combine(Application.persistentDataPath, "ranking.json");
+            LoadRanking();
+        }
+        else
+        {
+            Destroy(gameObject);  // 중복 생성 방지
+        }
+
         filePath = Path.Combine(Application.persistentDataPath, "ranking.json");
         LoadRanking();
     }
